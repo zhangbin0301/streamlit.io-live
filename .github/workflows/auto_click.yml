@@ -5,6 +5,10 @@ on:
     - cron: '0 */12 * * *'     # 每 12 小时自动运行
   workflow_dispatch:           # 支持手动运行
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   clicker:
     runs-on: ubuntu-latest
@@ -48,3 +52,13 @@ jobs:
           git commit -m "更新日志: $(date +'%Y-%m-%d %H:%M:%S')"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
         fi
+
+      # 🧹 清理超24小时的运行记录
+    - name: Clean up old workflow runs
+      uses: MajorScruffy/delete-old-workflow-runs@v0.3.0
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        repository: ${{ github.repository }}
+        older-than-seconds: 86400
+        
